@@ -3,8 +3,6 @@ import sys
 from contextlib import redirect_stdout
 from unittest.mock import patch
 
-import pytest
-
 import game
 
 
@@ -131,27 +129,25 @@ def test_score_starts_at_zero():
     assert game.score == 0
 
 
-def test_hazard_triggers_game_over():
+def test_hazard_returns_game_over():
     game.player_x, game.player_y = 1, 0
     game.hazard_x, game.hazard_y = 2, 0
-    with pytest.raises(SystemExit):
-        game.move(1, 0)
+    result = game.move(1, 0)
+    assert result == "game_over"
 
 
-def test_hazard_shows_game_over_message():
-    game.player_x, game.player_y = 1, 0
-    game.hazard_x, game.hazard_y = 2, 0
-    f = io.StringIO()
-    with redirect_stdout(f), pytest.raises(SystemExit):
-        game.move(1, 0)
-    assert "Game Over!" in f.getvalue()
-
-
-def test_normal_move_not_affected_by_hazard():
+def test_normal_move_returns_none():
     game.player_x, game.player_y = 0, 0
     game.hazard_x, game.hazard_y = 4, 4
+    result = game.move(1, 0)
+    assert result is None
+
+
+def test_hazard_does_not_exit():
+    game.player_x, game.player_y = 1, 0
+    game.hazard_x, game.hazard_y = 2, 0
     game.move(1, 0)
-    assert game.player_x == 1
+    assert game.player_x == 2 and game.player_y == 0
 
 
 def test_spawn_hazard_not_on_player_or_collectible():
@@ -186,12 +182,11 @@ def test_main_loop_wasd():
 
 
 def test_main_loop_wasd_all_directions():
-    game.player_x, game.player_y = 2, 2
-    inputs = iter(["w", "a", "s", "d", "quit"])
+    inputs = iter(["d", "s", "a", "w", "quit"])
     with patch("builtins.input", side_effect=inputs):
         with redirect_stdout(io.StringIO()):
             game.main_loop()
-    assert game.player_x == 2 and game.player_y == 2
+    assert game.player_x == 0 and game.player_y == 0
 
 
 def test_main_loop_shows_score():
@@ -206,3 +201,16 @@ def test_main_loop_shows_score():
 def test_spawn_collectible_not_on_player():
     game.spawn_collectible()
     assert (game.collectible_x, game.collectible_y) != (game.player_x, game.player_y)
+
+
+def test_reset_game_sets_defaults():
+    game.player_x, game.player_y = 3, 3
+    game.score = 7
+    game.collectible_x, game.collectible_y = 0, 0
+    game.hazard_x, game.hazard_y = 1, 1
+    game.reset_game()
+    assert game.player_x == 0
+    assert game.player_y == 0
+    assert game.score == 0
+    assert (game.collectible_x, game.collectible_y) != (0, 0)
+    assert (game.hazard_x, game.hazard_y) != (0, 0)
