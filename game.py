@@ -8,6 +8,8 @@ player_y = 0
 score = 0
 collectible_x = 0
 collectible_y = 0
+hazard_x = 0
+hazard_y = 0
 
 def spawn_collectible():
     global collectible_x, collectible_y
@@ -19,12 +21,24 @@ def spawn_collectible():
             collectible_y = y
             break
 
+def spawn_hazard():
+    global hazard_x, hazard_y
+    while True:
+        x = random.randrange(GRID_SIZE)
+        y = random.randrange(GRID_SIZE)
+        if (x != player_x or y != player_y) and (x != collectible_x or y != collectible_y):
+            hazard_x = x
+            hazard_y = y
+            break
+
 def draw_grid():
     for y in range(GRID_SIZE):
         row = ""
         for x in range(GRID_SIZE):
             if x == player_x and y == player_y:
                 row += "P "
+            elif x == hazard_x and y == hazard_y:
+                row += "H "
             elif x == collectible_x and y == collectible_y:
                 row += "C "
             else:
@@ -38,6 +52,9 @@ def move(dx, dy):
     if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
         player_x = nx
         player_y = ny
+        if player_x == hazard_x and player_y == hazard_y:
+            print("Game Over!")
+            exit(0)
         if player_x == collectible_x and player_y == collectible_y:
             score += 1
             spawn_collectible()
@@ -48,6 +65,7 @@ def main_loop():
     print("WASD to move, quit to exit\n")
 
     spawn_collectible()
+    spawn_hazard()
 
     while True:
         os.system("clear" if os.name == "posix" else "cls")

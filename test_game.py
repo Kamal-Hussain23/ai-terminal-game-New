@@ -3,6 +3,8 @@ import sys
 from contextlib import redirect_stdout
 from unittest.mock import patch
 
+import pytest
+
 import game
 
 
@@ -12,6 +14,8 @@ def reset():
     game.score = 0
     game.collectible_x = 2
     game.collectible_y = 2
+    game.hazard_x = -1
+    game.hazard_y = -1
 
 
 def capture_grid():
@@ -40,6 +44,15 @@ def test_draw_grid_shows_collectible():
     game.collectible_y = 1
     lines = capture_grid()
     assert lines[1].strip() == "C . . . ."
+
+
+def test_draw_grid_shows_hazard():
+    game.collectible_x = 4
+    game.collectible_y = 4
+    game.hazard_x = 0
+    game.hazard_y = 2
+    lines = capture_grid()
+    assert lines[2].strip() == "H . . . ."
 
 
 def test_move_right():
@@ -116,6 +129,36 @@ def test_collect_respawns_not_on_player():
 
 def test_score_starts_at_zero():
     assert game.score == 0
+
+
+def test_hazard_triggers_game_over():
+    game.player_x, game.player_y = 1, 0
+    game.hazard_x, game.hazard_y = 2, 0
+    with pytest.raises(SystemExit):
+        game.move(1, 0)
+
+
+def test_hazard_shows_game_over_message():
+    game.player_x, game.player_y = 1, 0
+    game.hazard_x, game.hazard_y = 2, 0
+    f = io.StringIO()
+    with redirect_stdout(f), pytest.raises(SystemExit):
+        game.move(1, 0)
+    assert "Game Over!" in f.getvalue()
+
+
+def test_normal_move_not_affected_by_hazard():
+    game.player_x, game.player_y = 0, 0
+    game.hazard_x, game.hazard_y = 4, 4
+    game.move(1, 0)
+    assert game.player_x == 1
+
+
+def test_spawn_hazard_not_on_player_or_collectible():
+    game.spawn_hazard()
+    pos = (game.hazard_x, game.hazard_y)
+    assert pos != (game.player_x, game.player_y)
+    assert pos != (game.collectible_x, game.collectible_y)
 
 
 def test_main_loop_quit():
