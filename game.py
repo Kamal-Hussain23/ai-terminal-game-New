@@ -1,3 +1,5 @@
+import os
+
 GRID_SIZE = 5
 
 player_x = 0
@@ -23,22 +25,23 @@ def move(dx, dy):
 
 def main_loop():
     print("Welcome to the Grid Game!")
-    print("Commands: up, down, left, right, quit\n")
+    print("WASD to move, quit to exit\n")
 
     while True:
+        os.system("clear" if os.name == "posix" else "cls")
         draw_grid()
         cmd = input("\n> ").strip().lower()
 
         if cmd == "quit":
             print("Goodbye!")
             break
-        elif cmd == "up":
+        elif cmd == "w":
             move(0, -1)
-        elif cmd == "down":
+        elif cmd == "s":
             move(0, 1)
-        elif cmd == "left":
+        elif cmd == "a":
             move(-1, 0)
-        elif cmd == "right":
+        elif cmd == "d":
             move(1, 0)
         else:
             print("Unknown command.")

@@ -93,10 +93,19 @@ def test_main_loop_unknown_command():
     assert "Unknown command." in output
 
 
-def test_main_loop_movement():
+def test_main_loop_wasd():
     game.player_x, game.player_y = 0, 0
-    inputs = iter(["right", "quit"])
+    inputs = iter(["d", "quit"])
     with patch("builtins.input", side_effect=inputs):
         with redirect_stdout(io.StringIO()):
             game.main_loop()
     assert game.player_x == 1 and game.player_y == 0
+
+
+def test_main_loop_wasd_all_directions():
+    game.player_x, game.player_y = 2, 2
+    inputs = iter(["w", "a", "s", "d", "quit"])
+    with patch("builtins.input", side_effect=inputs):
+        with redirect_stdout(io.StringIO()):
+            game.main_loop()
+    assert game.player_x == 2 and game.player_y == 2
