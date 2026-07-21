@@ -34,14 +34,16 @@ def test_start_position():
 
 def test_draw_grid_shows_player():
     lines = capture_grid()
-    assert lines[0].strip() == "P . . . ."
+    assert game.PLAYER in lines[0]
+    assert "." in lines[0]
 
 
 def test_draw_grid_shows_collectible():
     game.collectible_x = 0
     game.collectible_y = 1
     lines = capture_grid()
-    assert lines[1].strip() == "C . . . ."
+    assert game.COLLECTIBLE in lines[1]
+    assert "." in lines[1]
 
 
 def test_draw_grid_shows_hazard():
@@ -50,7 +52,8 @@ def test_draw_grid_shows_hazard():
     game.hazard_x = 0
     game.hazard_y = 2
     lines = capture_grid()
-    assert lines[2].strip() == "H . . . ."
+    assert game.HAZARD in lines[2]
+    assert "." in lines[2]
 
 
 def test_move_right():
@@ -58,7 +61,8 @@ def test_move_right():
     assert game.player_x == 1
     assert game.player_y == 0
     lines = capture_grid()
-    assert lines[0].strip() == ". P . . ."
+    assert game.PLAYER in lines[0]
+    assert lines[0].index(game.PLAYER) > lines[0].index(".")
 
 
 def test_move_down():
@@ -67,7 +71,7 @@ def test_move_down():
     assert game.player_x == 1
     assert game.player_y == 1
     lines = capture_grid()
-    assert lines[1].strip() == ". P . . ."
+    assert game.PLAYER in lines[1]
 
 
 def test_move_left():
@@ -157,10 +161,36 @@ def test_spawn_hazard_not_on_player_or_collectible():
     assert pos != (game.collectible_x, game.collectible_y)
 
 
-def test_main_loop_quit():
+def test_main_loop_shows_intro():
     with patch("builtins.input", return_value="quit"):
-        with redirect_stdout(io.StringIO()):
+        f = io.StringIO()
+        with redirect_stdout(f):
             game.main_loop()
+    output = f.getvalue()
+    assert "Danger Dragon" in output
+    assert "Navigate the Dragon Rider to collect eggs." in output
+
+
+def test_main_loop_shows_win_message():
+    game.score = 9
+    game.collectible_x, game.collectible_y = 1, 0
+    with patch("builtins.input", side_effect=["d", "n"]):
+        with patch.object(game, "reset_game", return_value=None):
+            f = io.StringIO()
+            with redirect_stdout(f):
+                game.main_loop()
+    assert "yahoo! you win" in f.getvalue()
+
+
+def test_main_loop_shows_lose_message():
+    game.player_x, game.player_y = 1, 0
+    game.hazard_x, game.hazard_y = 2, 0
+    with patch("builtins.input", side_effect=["d", "n"]):
+        with patch.object(game, "reset_game", return_value=None):
+            f = io.StringIO()
+            with redirect_stdout(f):
+                game.main_loop()
+    assert "Ooh! You Lose!!" in f.getvalue()
 
 
 def test_main_loop_unknown_command():

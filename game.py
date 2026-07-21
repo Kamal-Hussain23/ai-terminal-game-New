@@ -2,6 +2,10 @@ import os
 import random
 
 GRID_SIZE = 5
+PLAYER = "🚀"
+COLLECTIBLE = "🦊"
+HAZARD = "🌋"
+EMPTY = "."
 
 
 def reset_game():
@@ -44,13 +48,13 @@ def draw_grid():
         row = ""
         for x in range(GRID_SIZE):
             if x == player_x and y == player_y:
-                row += "P "
+                row += PLAYER + " "
             elif x == hazard_x and y == hazard_y:
-                row += "H "
+                row += HAZARD + " "
             elif x == collectible_x and y == collectible_y:
-                row += "C "
+                row += COLLECTIBLE + " "
             else:
-                row += ". "
+                row += EMPTY + " "
         print(row)
 
 
@@ -70,7 +74,8 @@ def move(dx, dy):
 
 
 def main_loop():
-    print("Welcome to the Grid Game!")
+    print("Danger Dragon")
+    print("Navigate the Dragon Rider to collect eggs.\n")
     print("WASD to move, quit to exit\n")
 
     reset_game()
@@ -81,7 +86,7 @@ def main_loop():
         draw_grid()
 
         if score >= 10:
-            print("\nVictory! You reached 10 points!")
+            print("\nyahoo! you win")
             again = input("Play again? (y/n) ").strip().lower()
             if again == "y":
                 reset_game()
@@ -97,7 +102,7 @@ def main_loop():
         elif cmd == "w":
             result = move(0, -1)
             if result == "game_over":
-                print("Game Over!")
+                print("Ooh! You Lose!!")
                 again = input("Play again? (y/n) ").strip().lower()
                 if again == "y":
                     reset_game()
@@ -107,7 +112,7 @@ def main_loop():
         elif cmd == "s":
             result = move(0, 1)
             if result == "game_over":
-                print("Game Over!")
+                print("Ooh! You Lose!!")
                 again = input("Play again? (y/n) ").strip().lower()
                 if again == "y":
                     reset_game()
@@ -117,7 +122,7 @@ def main_loop():
         elif cmd == "a":
             result = move(-1, 0)
             if result == "game_over":
-                print("Game Over!")
+                print("Ooh! You Lose!!")
                 again = input("Play again? (y/n) ").strip().lower()
                 if again == "y":
                     reset_game()
@@ -127,7 +132,7 @@ def main_loop():
         elif cmd == "d":
             result = move(1, 0)
             if result == "game_over":
-                print("Game Over!")
+                print("Ooh! You Lose!!")
                 again = input("Play again? (y/n) ").strip().lower()
                 if again == "y":
                     reset_game()
